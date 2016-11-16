@@ -8,10 +8,8 @@ var interactiveSankey = function (webcharts) {
         link_col: null
 
         //Standard template settings
-        , x: { type: 'ordinal',
-            label: '' },
-        y: { type: 'linear',
-            label: 'Frequency' },
+        , x: { type: 'ordinal' },
+        y: { type: 'linear' },
         marks: [{ type: 'bar',
             arrange: 'stacked',
             summarizeY: 'count',
@@ -21,7 +19,9 @@ var interactiveSankey = function (webcharts) {
 
     function syncSettings(settings) {
         settings.x.column = settings.node_col;
+        settings.x.label = settings.node_col;
         settings.y.column = settings.id_col;
+        settings.y.label = '# of ' + settings.id_col + 's';
         settings.marks[0].per = [settings.node_col];
         settings.marks[0].split = settings.link_col;
         settings.color_by = settings.link_col;
@@ -50,32 +50,42 @@ var interactiveSankey = function (webcharts) {
 
         //Reset displays.
         this.wrap.selectAll('path.link').remove();
+        this.wrap.selectAll('.barAnnotation').remove();
 
         //Update legend to represent categories represented in chart.
         this.makeLegend();
-        var currentLinks = d3.set(this.filtered_data.map(d => d.title)).values();
+        var currentLinks = d3.set(this.filtered_data.map(d => d[context.config.link_col])).values();
         this.wrap.selectAll('.legend-item').filter(function () {
             return currentLinks.indexOf(d3.select(this).select('.legend-label')[0][0].textContent) === -1;
         }).remove();
 
-        //Update bar tooltips.
-        var bars = this.wrap.selectAll('rect.wc-data-mark');
-        bars.each(function (d) {
-            var bar = d3.select(this);
-            bar.classed(d.key.replace(/[^a-z0-9]/gi, ''), true);
-            var IDs = d.values.raw.map(d => d[context.config.id_col]);
-            var nIDs = d.values.raw.length;
-            bar.select('title').text(d.key + ' (' + nIDs + '):\n - ' + IDs.slice(0, 3).join('\n - ') + (nIDs > 3 ? '\n - and ' + (nIDs - 3) + ' more' : ''));
-        });
-
-        /*****----------------------------------------------------------------------------\
-          Sankey plot
-        \----------------------------------------------------------------------------*****/
+        /**-------------------------------------------------------------------------------------------\
+          Default links
+        \-------------------------------------------------------------------------------------------**/
 
         //Capture stacked bar groups.
         var barGroups = this.svg.selectAll('.bar-group');
         var nBarGroups = barGroups[0].length - 1;
         barGroups.each(function (barGroup, i) {
+            //Annotate bars and modify tooltips.
+            var yPosition = barGroup.total;
+            d3.select(this).selectAll('rect.wc-data-mark').each(function (d) {
+                var bar = d3.select(this);
+                bar.classed(d.key.replace(/[^a-z0-9]/gi, ''), true);
+                var IDs = d.values.raw.map(d => d[context.config.id_col]);
+                var n = d.values.raw.length;
+                var N = context.raw_data.filter(di => di[context.config.node_col] === d.values.x).length;
+                var pct = n / N;
+                d3.select(bar.node().parentNode).append('text').attr({ 'class': 'barAnnotation',
+                    'x': di => context.x(d.values.x),
+                    'y': di => context.y(yPosition),
+                    'dx': '.25em',
+                    'dy': '.9em' }).text(n + ' (' + d3.format('%')(pct) + ')');
+                bar.select('title').text(n + ' ' + context.config.id_col + 's at ' + d.key + ' (' + d3.format('%')(pct) + '):' + '\n - ' + IDs.slice(0, 3).join('\n - ') + (n > 3 ? '\n - and ' + (n - 3) + ' more' : ''));
+                yPosition -= n;
+            });
+
+            //Draw links from any bar group except the last bar group.
             if (i < nBarGroups) {
                 var barGroup1 = d3.select(this);
                 var barGroup2 = d3.select(barGroups[0][i + 1]);
@@ -187,6 +197,49 @@ var interactiveSankey = function (webcharts) {
                 var IDs = d[0].IDs;
                 return n + ' ' + context.config.y.column + (n > 1 ? 's ' : ' ') + (split1 === split2 ? 'remained at ' + split1 : 'progressed from ' + split1 + ' to ' + split2) + ':\n - ' + IDs.slice(0, 3).join('\n - ') + (n > 3 ? '\n - and ' + (n - 3) + ' more' : '');
             });
+        });
+
+        /**-------------------------------------------------------------------------------------------\
+          Selected links
+        \-------------------------------------------------------------------------------------------**/
+
+        //Flatten [ this.current_data ] to one item per node per link.
+        var barData = [];
+        this.current_data.forEach(d => {
+            d.values.forEach(di => {
+                barData.push({ node: d.key,
+                    link: di.key,
+                    start: di.values.start });
+            });
+        });
+
+        //Add click event listener to bars.
+        var bars = this.wrap.selectAll('rect.wc-data-mark');
+        bars.style('cursor', 'pointer').on('click', function (d) {
+            //Reduce bar opacity.
+            bars.style('fill-opacity', .25);
+            //Capture [ settings.id_col ] values represented by selected bar.
+            var selectedIDs = d.values.raw.map(d => d[context.config.id_col]);
+            //Filter raw data on selected [ settings.id_col ] values and nest by node and link.
+            var selectedData = d3.nest().key(d => d[context.config.node_col]).key(d => d[context.config.link_col]).rollup(d => d.length).entries(context.raw_data.filter(d => selectedIDs.indexOf(d[context.config.id_col]) > -1));
+            //Flatten nested data to one item per node per link.
+            var selectedBarData = [];
+            selectedData.forEach(d => {
+                d.values.forEach(di => {
+                    selectedBarData.push({ node: d.key,
+                        link: di.key,
+                        start: barData.filter(dii => dii.node === d.key && dii.link === di.key)[0].start,
+                        n: di.values });
+                });
+            });
+            //Draw bars.
+            context.wrap.selectAll('.selectedIDs').remove();
+            var selectedIDbars = context.svg.selectAll('rect.selectedIDs').data(selectedBarData).enter().append('rect').attr({ class: 'selectedIDs',
+                x: d => context.x(d.node),
+                y: d => context.y(d.start),
+                width: d3.select(this).attr('width'),
+                height: d => context.y(d.start - d.n) - context.y(d.start) }).style({ fill: d => context.colorScale(d.link),
+                stroke: d => context.colorScale(d.link) });
         });
     }
 

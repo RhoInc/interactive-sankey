@@ -5,10 +5,8 @@ const settings =
     ,link_col: null
 
   //Standard template settings
-    ,x: {type: 'ordinal'
-        ,label: ''}
-    ,y: {type: 'linear'
-        ,label: 'Frequency'}
+    ,x: {type: 'ordinal'}
+    ,y: {type: 'linear'}
     ,marks:
         [   {type: 'bar'
             ,arrange: 'stacked'
@@ -21,7 +19,9 @@ const settings =
 
 export function syncSettings(settings) {
     settings.x.column = settings.node_col;
+    settings.x.label = settings.node_col;
     settings.y.column = settings.id_col;
+    settings.y.label = '# of ' + settings.id_col + 's';
     settings.marks[0].per = [settings.node_col];
     settings.marks[0].split = settings.link_col;
     settings.color_by = settings.link_col;
