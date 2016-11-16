@@ -1,0 +1,23 @@
+{
+  "name": "interactive-sankey",
+  "version": "0.0.0",
+  "description": "Sankey diagram visualizing change in state",
+  "main": "./build/interactiveSankey.js",
+  "scripts": {
+    "build": "rollup -c ./scripts/rollup.wrapper.config.js | babel > ./build/interactiveSankey.js",
+    "build-chf": "rollup -c ./scripts/rollup.chf.config.js  > ./build/interactiveSankey-chf.js"
+  },
+  "author": "Rho, Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^3.5.14",
+    "webcharts": "^1.3.2",
+    "react": "^0.14.7"
+  },
+  "devDependencies": {
+    "babel": "^5.8.35",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "rollup": "^0.25.1",
+    "rollup-plugin-babel": "^2.4.0"
+  }
+}
