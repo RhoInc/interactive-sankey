@@ -116,4 +116,32 @@ export default function drawLinks(chartObject, bars1, bars2, linkClass) {
                     ,'stroke': () => chartObject.colorScale(d.split1)
                     ,'stroke-opacity': .5});
         });
+
+  //Add event listeners and tooltips to links.
+    var links = d3.selectAll('path.link');
+    links
+        .on('mouseover', function() {
+            d3.select(this)
+                .style(
+                    {'fill-opacity': 1
+                    ,'stroke-opacity': 1}); })
+        .on('mouseout', function() {
+            d3.select(this)
+                .style(
+                    {'fill-opacity': .5
+                    ,'stroke-opacity': .5}); })
+        .append('title')
+        .text(d => {
+            var n = d[0].n;
+            var split1 = d[0].split1;
+            var split2 = d[0].split2;
+            var IDs = d[0].IDs;
+            return  n + ' ' + chartObject.config.y.column
+                +   (n > 1 ? 's ' : ' ')
+                +   (split1 === split2 ?
+                     'remained at ' + split1 :
+                     'progressed from ' + split1 + ' to ' + split2) + ':\n - '
+                + IDs.slice(0,3).join('\n - ')
+                + (n > 3 ? '\n - and ' + (n - 3) + ' more' : '');
+        });
 }

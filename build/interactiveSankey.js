@@ -135,6 +135,22 @@ var interactiveSankey = function (webcharts) {
                 'stroke': () => chartObject.colorScale(d.split1),
                 'stroke-opacity': .5 });
         });
+
+        //Add event listeners and tooltips to links.
+        var links = d3.selectAll('path.link');
+        links.on('mouseover', function () {
+            d3.select(this).style({ 'fill-opacity': 1,
+                'stroke-opacity': 1 });
+        }).on('mouseout', function () {
+            d3.select(this).style({ 'fill-opacity': .5,
+                'stroke-opacity': .5 });
+        }).append('title').text(d => {
+            var n = d[0].n;
+            var split1 = d[0].split1;
+            var split2 = d[0].split2;
+            var IDs = d[0].IDs;
+            return n + ' ' + chartObject.config.y.column + (n > 1 ? 's ' : ' ') + (split1 === split2 ? 'remained at ' + split1 : 'progressed from ' + split1 + ' to ' + split2) + ':\n - ' + IDs.slice(0, 3).join('\n - ') + (n > 3 ? '\n - and ' + (n - 3) + ' more' : '');
+        });
     }
 
     function onResize() {
@@ -168,7 +184,7 @@ var interactiveSankey = function (webcharts) {
                 var n = d.values.raw.length;
                 var N = context.raw_data.filter(di => di[context.config.node_col] === d.values.x).length;
                 var pct = n / N;
-                d3.select(bar.node().parentNode).append('text').attr({ 'class': 'barAnnotation',
+                d3.select(bar.node().parentNode).append('text').datum([{ node: d.values.x, link: d.key, text: n + ' (' + d3.format('%')(pct) + ')' }]).attr({ 'class': 'barAnnotation',
                     'x': di => context.x(d.values.x),
                     'y': di => context.y(yPosition),
                     'dx': '.25em',
@@ -183,22 +199,6 @@ var interactiveSankey = function (webcharts) {
                 var barGroup2 = d3.select(barGroups[0][i + 1]);
                 drawLinks(context, barGroup1.selectAll('.bar'), barGroup2.selectAll('.bar'), 'defaultLink');
             }
-
-            //Add event listeners and tooltips to links.
-            var links = d3.selectAll('path.link');
-            links.on('mouseover', function () {
-                d3.select(this).style({ 'fill-opacity': 1,
-                    'stroke-opacity': 1 });
-            }).on('mouseout', function () {
-                d3.select(this).style({ 'fill-opacity': .5,
-                    'stroke-opacity': .5 });
-            }).append('title').text(d => {
-                var n = d[0].n;
-                var split1 = d[0].split1;
-                var split2 = d[0].split2;
-                var IDs = d[0].IDs;
-                return n + ' ' + context.config.y.column + (n > 1 ? 's ' : ' ') + (split1 === split2 ? 'remained at ' + split1 : 'progressed from ' + split1 + ' to ' + split2) + ':\n - ' + IDs.slice(0, 3).join('\n - ') + (n > 3 ? '\n - and ' + (n - 3) + ' more' : '');
-            });
         });
 
         /**-------------------------------------------------------------------------------------------\
@@ -219,8 +219,11 @@ var interactiveSankey = function (webcharts) {
         var bars = this.wrap.selectAll('rect.wc-data-mark');
         bars.style('cursor', 'pointer').on('click', function (d) {
             //Reduce bar opacity.
+            var thisBar = this;
             bars.style('fill-opacity', .25);
             context.wrap.selectAll('.defaultLink').style('display', 'none');
+            context.wrap.selectAll('.barAnnotation').style('display', 'none');
+            context.wrap.selectAll('.selectedIDs').remove();
             context.wrap.selectAll('.selectedLink').remove();
             //Capture [ settings.id_col ] values represented by selected bar.
             var selectedIDs = d.values.raw.map(d => d[context.config.id_col]);
@@ -236,13 +239,18 @@ var interactiveSankey = function (webcharts) {
                         start: barData.filter(dii => dii.node === d.key && dii.link === di.key)[0].start } }));
             });
             //Draw bars.
-            context.wrap.selectAll('.selectedIDs').remove();
             var selectedIDbars = context.svg.selectAll('rect.selectedIDs').data(selectedBarData).enter().append('rect').attr({ class: 'selectedIDs',
                 x: d => context.x(d.values.x),
                 y: d => context.y(d.values.start),
                 width: d3.select(this).attr('width'),
                 height: d => context.y(d.values.start - d.values.y) - context.y(d.values.start) }).style({ fill: d => context.colorScale(d.key),
                 stroke: d => context.colorScale(d.key) });
+            //Annotate bars.
+            context.svg.selectAll('text.selectedIDs').data(selectedBarData).enter().append('text').attr({ class: 'selectedIDs',
+                x: d => context.x(d.values.x),
+                y: d => context.y(d.values.start),
+                dx: '.25em',
+                dy: '.9em' }).text(d => d.values.y + ' (' + d3.format('%')(d.values.y / selectedIDs.length) + ')');
             //Draw links.
             var nodes = selectedData.map(d => d.key);
             for (var i = 0; i < nodes.length; i++) {
@@ -254,8 +262,10 @@ var interactiveSankey = function (webcharts) {
             selectedIDbars.style('cursor', 'pointer').on('click', function () {
                 bars.style('fill-opacity', 1);
                 selectedIDbars.remove();
+                context.wrap.selectAll('text.selectedIDs').remove();
                 context.wrap.selectAll('.selectedLink').remove();
                 context.wrap.selectAll('.defaultLink').style('display', '');
+                context.wrap.selectAll('.barAnnotation').style('display', '');
             });
         });
     }
