@@ -127,10 +127,22 @@ export default function onResize() {
                     .style(
                         {fill: d => context.colorScale(d.key)
                         ,stroke: d => context.colorScale(d.key)});
-                selectedIDbars.select('title')
-                    .text(di =>
-                        di.values.y + ' ' + context.config.id_col + 's at ' + di.values.x + ' (' + d3.format('%')(d.values.y/selectedIDs.length) + '):' +
-                        '\n - ' + d.values.raw.map(dii => dii[context.config.id_col].slice(0, 3).join('\n - ') + (n > 3 ? '\n - and ' + (n - 3) + ' more' : ''));
+                    selectedIDbars
+                        .each(function() {
+                            d3.select(this).append('title')
+                                .text(di =>
+                                    di.values.y + ' ' +
+                                    context.config.id_col + 's at ' +
+                                    di.values.x + ' (' +
+                                    d3.format('%')(di.values.y / selectedIDs.length) + '):' + '\n - ' +
+                                    di.values.raw
+                                        .map(dii => dii[context.config.id_col])
+                                        .slice(0, 3)
+                                        .join('\n - ') +
+                                    (di.values.y > 3 ?
+                                        '\n - and ' + (di.values.y - 3) + ' more' :
+                                        ''));
+                        });
               //Annotate bars.
                 context.svg.selectAll('text.selectedIDs')
                     .data(selectedBarData).enter()

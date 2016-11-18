@@ -245,6 +245,9 @@ var interactiveSankey = function (webcharts) {
                 width: d3.select(this).attr('width'),
                 height: d => context.y(d.values.start - d.values.y) - context.y(d.values.start) }).style({ fill: d => context.colorScale(d.key),
                 stroke: d => context.colorScale(d.key) });
+            selectedIDbars.each(function () {
+                d3.select(this).append('title').text(di => di.values.y + ' ' + context.config.id_col + 's at ' + di.values.x + ' (' + d3.format('%')(di.values.y / selectedIDs.length) + '):' + '\n - ' + di.values.raw.map(dii => dii[context.config.id_col]).slice(0, 3).join('\n - ') + (di.values.y > 3 ? '\n - and ' + (di.values.y - 3) + ' more' : ''));
+            });
             //Annotate bars.
             context.svg.selectAll('text.selectedIDs').data(selectedBarData).enter().append('text').attr({ class: 'selectedIDs',
                 x: d => context.x(d.values.x),
