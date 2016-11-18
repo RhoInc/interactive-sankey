@@ -221,6 +221,7 @@ var interactiveSankey = function (webcharts) {
             //Reduce bar opacity.
             bars.style('fill-opacity', .25);
             context.wrap.selectAll('.defaultLink').style('display', 'none');
+            context.wrap.selectAll('.selectedLink').remove();
             //Capture [ settings.id_col ] values represented by selected bar.
             var selectedIDs = d.values.raw.map(d => d[context.config.id_col]);
             //Filter raw data on selected [ settings.id_col ] values and nest by node and link.
@@ -229,7 +230,7 @@ var interactiveSankey = function (webcharts) {
             var selectedBarData = [];
             selectedData.forEach(d => {
                 d.values.forEach(di => selectedBarData.push({ key: di.key,
-                    values: { raw: context.raw_data.filter(dii => dii[context.config.node_col].toString() === d.key.toString() && dii[context.config.link_col].toString() === di.key.toString()),
+                    values: { raw: context.raw_data.filter(dii => selectedIDs.indexOf(dii[context.config.id_col]) > -1 && dii[context.config.node_col].toString() === d.key.toString() && dii[context.config.link_col].toString() === di.key.toString()),
                         x: d.key,
                         y: di.values,
                         start: barData.filter(dii => dii.node === d.key && dii.link === di.key)[0].start } }));

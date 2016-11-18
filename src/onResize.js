@@ -111,6 +111,7 @@ export default function onResize() {
               //Reduce bar opacity.
                 bars.style('fill-opacity', .25);
                 context.wrap.selectAll('.defaultLink').style('display', 'none');
+                context.wrap.selectAll('.selectedLink').remove();
               //Capture [ settings.id_col ] values represented by selected bar.
                 var selectedIDs = d.values.raw.map(d => d[context.config.id_col]);
               //Filter raw data on selected [ settings.id_col ] values and nest by node and link.
@@ -130,6 +131,7 @@ export default function onResize() {
                                 ,values:
                                     {raw: context.raw_data
                                         .filter(dii =>
+                                            selectedIDs.indexOf(dii[context.config.id_col]) > -1 &&
                                             dii[context.config.node_col].toString() === d.key.toString() &&
                                             dii[context.config.link_col].toString() === di.key.toString())
                                     ,x: d.key
