@@ -1,3 +1,3 @@
 export default function onDraw() {
-    var context = this;
+    const chart = this;
 }

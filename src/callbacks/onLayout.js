@@ -1,3 +1,3 @@
 export default function onLayout() {
-    var context = this;
+    const chart = this;
 }

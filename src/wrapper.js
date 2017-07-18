@@ -1,32 +1,19 @@
-import { createChart, createControls, createTable } from 'webcharts';
-import { controlInputs, syncControlInputs, syncSettings } from './default-settings'
-import config from './default-settings';
-import onInit from './onInit';
-import onLayout from './onLayout';
-import onDataTransform from './onDataTransform';
-import onDraw from './onDraw';
-import onResize from './onResize';
 import './util/object-assign';
+import defaultSettings, { syncSettings } from './defaultSettings';
+import callbacks from './callbacks/index';
+import { createChart } from 'webcharts';
 
 export default function interactiveSankey(element, settings) {
+    //Merge user's settings with default settings..
+    const mergedSettings = Object.assign({}, defaultSettings, settings);
 
-  //Merge user's settings with default settings..
-    let mergedSettings = Object.assign({}, config, settings);
+    //Sync settings with data mappings.
+    const syncedSettings = syncSettings(mergedSettings);
 
-  //Sync settings with data mappings.
-    mergedSettings = syncSettings(mergedSettings);
-
-  //Sync settings with control inputs.
-    //let syncedControlInputs = syncControlInputs(controlInputs, mergedSettings);
-    //let controls = createControls(element, {location: 'top', inputs: syncedControlInputs});
-
-  //Create chart.
-    let chart = createChart(element, mergedSettings);
-    chart.on('init', onInit);
-    chart.on('layout', onLayout);
-    chart.on('datatransform', onDataTransform);
-    chart.on('draw', onDraw);
-    chart.on('resize', onResize);
+    //Create chart.
+    const chart = createChart(element, syncedSettings);
+    for (const callback in callbacks)
+        chart.on(callback.toLowerCase().substring(2), callbacks[callback]);
 
     return chart;
 }
