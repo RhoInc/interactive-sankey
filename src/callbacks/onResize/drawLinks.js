@@ -79,7 +79,11 @@ export default function drawLinks(chartObject, bars1, bars2, linkClass) {
     });
 
     //Draw links.
-    var pathDrawer = d3.svg.area().x(d => d.x).y0(d => d.y0).y1(d => d.y1);
+    var pathDrawer = d3.svg
+        .area()
+        .x(d => d.x)
+        .y0(d => d.y0)
+        .y1(d => d.y1);
     collapsedLinkData.forEach((d, i) => {
         var path = [
             {

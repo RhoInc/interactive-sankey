@@ -278,7 +278,11 @@ function onResize() {
                 return di[chart.config.node_col] === d.values.x;
             }).length;
             var pct = n / N;
-            d3.select(bar.node().parentNode).append('text').datum([{ node: d.values.x, link: d.key, text: n + ' (' + d3.format('%')(pct) + ')' }]).attr({
+            d3.select(bar.node().parentNode).append('text').datum([{
+                node: d.values.x,
+                link: d.key,
+                text: n + ' (' + d3.format('%')(pct) + ')'
+            }]).attr({
                 class: 'barAnnotation',
                 x: function x(di) {
                     return chart.x(d.values.x);
@@ -446,6 +450,7 @@ function interactiveSankey(element, settings) {
 
     //Create chart.
     var chart = webcharts.createChart(element, syncedSettings);
+
     for (var callback in callbacks) {
         chart.on(callback.toLowerCase().substring(2), callbacks[callback]);
     }return chart;

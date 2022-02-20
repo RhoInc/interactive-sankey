@@ -30,30 +30,34 @@ export default function onResize() {
     barGroups.each(function(barGroup, i) {
         //Annotate bars and modify tooltips.
         var yPosition = barGroup.total;
-        d3.select(this).selectAll('rect.wc-data-mark').each(function(d) {
-            var bar = d3.select(this);
-            bar.classed(d.key.replace(/[^a-z0-9]/gi, ''), true);
-            var IDs = d.values.raw.map(d => d[chart.config.id_col]);
-            var n = d.values.raw.length;
-            var N = chart.raw_data.filter(di => di[chart.config.node_col] === d.values.x).length;
-            var pct = n / N;
-            d3
-                .select(bar.node().parentNode)
-                .append('text')
-                .datum([
-                    { node: d.values.x, link: d.key, text: n + ' (' + d3.format('%')(pct) + ')' }
-                ])
-                .attr({
-                    class: 'barAnnotation',
-                    x: di => chart.x(d.values.x),
-                    y: di => chart.y(yPosition),
-                    dx: '.25em',
-                    dy: '.9em'
-                })
-                .text(n + ' (' + d3.format('%')(pct) + ')');
-            bar
-                .select('title')
-                .text(
+        d3.select(this)
+            .selectAll('rect.wc-data-mark')
+            .each(function(d) {
+                var bar = d3.select(this);
+                bar.classed(d.key.replace(/[^a-z0-9]/gi, ''), true);
+                var IDs = d.values.raw.map(d => d[chart.config.id_col]);
+                var n = d.values.raw.length;
+                var N = chart.raw_data.filter(di => di[chart.config.node_col] === d.values.x)
+                    .length;
+                var pct = n / N;
+                d3.select(bar.node().parentNode)
+                    .append('text')
+                    .datum([
+                        {
+                            node: d.values.x,
+                            link: d.key,
+                            text: n + ' (' + d3.format('%')(pct) + ')'
+                        }
+                    ])
+                    .attr({
+                        class: 'barAnnotation',
+                        x: di => chart.x(d.values.x),
+                        y: di => chart.y(yPosition),
+                        dx: '.25em',
+                        dy: '.9em'
+                    })
+                    .text(n + ' (' + d3.format('%')(pct) + ')');
+                bar.select('title').text(
                     n +
                         ' ' +
                         chart.config.id_col +
@@ -66,8 +70,8 @@ export default function onResize() {
                         IDs.slice(0, 3).join('\n - ') +
                         (n > 3 ? '\n - and ' + (n - 3) + ' more' : '')
                 );
-            yPosition -= n;
-        });
+                yPosition -= n;
+            });
 
         //Draw links from any bar group except the last bar group.
         if (i < nBarGroups) {
@@ -156,8 +160,7 @@ export default function onResize() {
                 stroke: d => chart.colorScale(d.key)
             });
         selectedIDbars.each(function() {
-            d3
-                .select(this)
+            d3.select(this)
                 .append('title')
                 .text(
                     di =>
