@@ -71,6 +71,16 @@ function onDraw() {
     var chart = this;
 }
 
+var toConsumableArray = function (arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+    return arr2;
+  } else {
+    return Array.from(arr);
+  }
+};
+
 function onInit() {
     var _this = this;
 
@@ -80,6 +90,17 @@ function onInit() {
     this.raw_data = this.raw_data.sort(function (a, b) {
         return a[_this.config.node_col] < b[_this.config.node_col] ? -1 : a[_this.config.node_col] > b[_this.config.node_col] ? 1 : 0;
     });
+
+    // Define order of states.
+    var states = [].concat(toConsumableArray(new Set(this.raw_data.map(function (d) {
+        return d[_this.config.link_col];
+    })).values())).sort();
+
+    if (this.config.legend.order === undefined || this.config.legend.order.constructor !== Array) this.config.legend.order = states;else {
+        states.forEach(function (state) {
+            if (_this.config.legend.order.includes(state) === false) _this.config.legend.order.push(state);
+        });
+    }
 }
 
 function onLayout() {
@@ -90,7 +111,11 @@ function onPreprocess() {
     var chart = this;
 }
 
-function drawLinks(chartObject, bars1, bars2, linkClass) {
+function drawLinks(bars1, bars2, linkClass) {
+    var _this = this;
+
+    var chartObject = this;
+
     //Merge adjacent bar groups by [ config.y.column ].
     var linkData = [];
     bars1.each(function (bar1, i1) {
@@ -119,8 +144,9 @@ function drawLinks(chartObject, bars1, bars2, linkClass) {
                 return di.id;
             }) };
     }).entries(linkData);
+
     nestedLinkData.sort(function (a, b) {
-        return a.key > b.key ? 1 : -1;
+        return _this.config.legend.order.indexOf(a.key) - _this.config.legend.order.indexOf(b.key);
     });
 
     //Flatten nested data array to one item per left bar [ config.marks.color_by ]
@@ -134,7 +160,7 @@ function drawLinks(chartObject, bars1, bars2, linkClass) {
         }).data()[0].values;
         var offset1 = 0;
         d.values.sort(function (a, b) {
-            return a.key < b.key ? -1 : b.key < a.key ? 1 : 0;
+            return _this.config.legend.order.indexOf(a.key) - _this.config.legend.order.indexOf(b.key);
         });
 
         d.values.forEach(function (di) {
@@ -301,7 +327,7 @@ function onResize() {
         if (i < nBarGroups) {
             var barGroup1 = d3.select(this);
             var barGroup2 = d3.select(barGroups[0][i + 1]);
-            drawLinks(chart, barGroup1.selectAll('.bar'), barGroup2.selectAll('.bar'), 'defaultLink');
+            drawLinks.call(chart, barGroup1.selectAll('.bar'), barGroup2.selectAll('.bar'), 'defaultLink');
         }
     });
 
@@ -412,7 +438,7 @@ function onResize() {
         });
         for (var i = 0; i < nodes.length; i++) {
             if (i < nodes.length - 1) {
-                drawLinks(chart, selectedIDbars.filter(function (d) {
+                drawLinks.call(chart, selectedIDbars.filter(function (d) {
                     return d.values.x === nodes[i];
                 }), selectedIDbars.filter(function (d) {
                     return d.values.x === nodes[i + 1];

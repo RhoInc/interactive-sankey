@@ -77,7 +77,7 @@ export default function onResize() {
         if (i < nBarGroups) {
             var barGroup1 = d3.select(this);
             var barGroup2 = d3.select(barGroups[0][i + 1]);
-            drawLinks(
+            drawLinks.call(
                 chart,
                 barGroup1.selectAll('.bar'),
                 barGroup2.selectAll('.bar'),
@@ -198,7 +198,7 @@ export default function onResize() {
         var nodes = selectedData.map(d => d.key);
         for (var i = 0; i < nodes.length; i++) {
             if (i < nodes.length - 1) {
-                drawLinks(
+                drawLinks.call(
                     chart,
                     selectedIDbars.filter(d => d.values.x === nodes[i]),
                     selectedIDbars.filter(d => d.values.x === nodes[i + 1]),

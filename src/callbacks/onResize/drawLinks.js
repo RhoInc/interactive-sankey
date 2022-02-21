@@ -1,4 +1,6 @@
-export default function drawLinks(chartObject, bars1, bars2, linkClass) {
+export default function drawLinks(bars1, bars2, linkClass) {
+    const chartObject = this;
+
     //Merge adjacent bar groups by [ config.y.column ].
     var linkData = [];
     bars1.each(function(bar1, i1) {
@@ -27,7 +29,10 @@ export default function drawLinks(chartObject, bars1, bars2, linkClass) {
             return { n: d.length, IDs: d.map(di => di.id) };
         })
         .entries(linkData);
-    nestedLinkData.sort((a, b) => (a.key > b.key ? 1 : -1));
+
+    nestedLinkData.sort(
+        (a, b) => this.config.legend.order.indexOf(a.key) - this.config.legend.order.indexOf(b.key)
+    );
 
     //Flatten nested data array to one item per left bar [ config.marks.color_by ]
     //value per right bar [ config.marks.color_by ] value.
@@ -37,7 +42,10 @@ export default function drawLinks(chartObject, bars1, bars2, linkClass) {
         var cat1 = bars1.data()[0].values.x;
         var bar1 = bars1.filter(dii => dii.key === d.key).data()[0].values;
         var offset1 = 0;
-        d.values.sort((a, b) => (a.key < b.key ? -1 : b.key < a.key ? 1 : 0));
+        d.values.sort(
+            (a, b) =>
+                this.config.legend.order.indexOf(a.key) - this.config.legend.order.indexOf(b.key)
+        );
 
         d.values.forEach(di => {
             var cat2 = bars2.data()[0].values.x;
