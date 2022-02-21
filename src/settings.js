@@ -12,10 +12,10 @@ export default //Customizable template settings
             type: 'bar',
             arrange: 'stacked',
             summarizeY: 'count',
-            tooltip: '$y at $x'
-        }
+            tooltip: '$y at $x',
+        },
     ],
-    legend: {}
+    legend: {},
 };
 
 export function syncSettings(settings) {
