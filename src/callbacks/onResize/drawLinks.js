@@ -19,6 +19,7 @@ export default function drawLinks(bars1, bars2, linkClass) {
             });
         });
     });
+    //console.table(linkData);
 
     //Nest merged bar groups by their respective [ config.marks.color_by ] values.
     var nestedLinkData = d3

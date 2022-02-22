@@ -3,6 +3,7 @@ export default //Customizable template settings
     id_col: 'USUBJID',
     node_col: null,
     link_col: null,
+    displayAnnotations: false,
 
     //Standard template settings
     x: { type: 'ordinal' },

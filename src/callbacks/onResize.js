@@ -9,7 +9,9 @@ export default function onResize() {
 
     //Update legend to represent categories represented in chart.
     this.makeLegend();
+
     var currentLinks = d3.set(this.filtered_data.map((d) => d[chart.config.link_col])).values();
+
     this.wrap
         .selectAll('.legend-item')
         .filter(function () {
@@ -23,11 +25,26 @@ export default function onResize() {
     /**-------------------------------------------------------------------------------------------\
       Default links
     \-------------------------------------------------------------------------------------------**/
+    const makeSelector = value => value.replace(/[^0-9_a-z]/gi, '-');
+    const getNodeId = (x, stratum) => `#node-${makeSelector(x)}-${makeSelector(stratum)}`;
+
+    // Add mouseover to bars to display n (%).
+    this.svg
+        .selectAll('.bar')
+        .on('mouseover', function (d) {
+            const id = getNodeId(d.avlues.x, d.key);
+            chart.svg.select(id).classed('hidden', false);
+        })
+        .on('mouseout', function (d) {
+            const id = getNodeId(d.avlues.x, d.key);
+            chart.svg.select(id).classed('hidden', true);
+        });
 
     //Capture stacked bar groups.
     var barGroups = this.svg.selectAll('.bar-group');
     var nBarGroups = barGroups[0].length - 1;
     barGroups.each(function (barGroup, i) {
+        console.log(barGroup);
         //Annotate bars and modify tooltips.
         var yPosition = barGroup.total;
         d3.select(this)
@@ -41,7 +58,8 @@ export default function onResize() {
                     (di) => di[chart.config.node_col] === d.values.x
                 ).length;
                 var pct = n / N;
-                d3.select(bar.node().parentNode)
+                const annotation = d3
+                    .select(bar.node().parentNode)
                     .append('text')
                     .datum([
                         {
@@ -51,7 +69,8 @@ export default function onResize() {
                         },
                     ])
                     .attr({
-                        class: 'barAnnotation',
+                        class: 'barAnnotation hidden',
+                        id: (di) => getNodeId(d.values.x, d.key).replace('#', ''),
                         x: (di) => chart.x(d.values.x),
                         y: (di) => chart.y(yPosition),
                         dx: '.25em',
