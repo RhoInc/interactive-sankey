@@ -3,6 +3,7 @@ export default //Customizable template settings
     id_col: 'USUBJID',
     node_col: null,
     link_col: null,
+    displayAnnotations: false,
 
     //Standard template settings
     x: { type: 'ordinal' },
@@ -12,10 +13,10 @@ export default //Customizable template settings
             type: 'bar',
             arrange: 'stacked',
             summarizeY: 'count',
-            tooltip: '$y at $x'
-        }
+            tooltip: '$y at $x',
+        },
     ],
-    legend: {}
+    legend: {},
 };
 
 export function syncSettings(settings) {

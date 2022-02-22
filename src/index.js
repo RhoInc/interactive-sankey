@@ -1,5 +1,5 @@
 import './util/object-assign';
-import defaultSettings, { syncSettings } from './defaultSettings';
+import defaultSettings, { syncSettings } from './settings';
 import callbacks from './callbacks/index';
 import { createChart } from 'webcharts';
 
@@ -12,6 +12,7 @@ export default function interactiveSankey(element, settings) {
 
     //Create chart.
     const chart = createChart(element, syncedSettings);
+
     for (const callback in callbacks)
         chart.on(callback.toLowerCase().substring(2), callbacks[callback]);
 

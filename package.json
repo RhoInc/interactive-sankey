@@ -1,25 +1,35 @@
 {
-  "name": "interactive-sankey",
-  "version": "0.1.0",
-  "description": "Sankey diagram visualizing change in state",
-  "main": "./build/interactiveSankey.js",
-  "author": "Rho, Inc.",
-  "license": "MIT",
-  "dependencies": {
-    "d3": "~3",
-    "webcharts": "~1.7"
-  },
-  "scripts": {
-    "format": "prettier --print-width=100 --tab-width=4 --single-quote --write \"src/**/*.js\"",
-    "build": "npm run format && rollup -c",
-    "watch": "rollup -c -w"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.0.0",
-    "babel-preset-es2015-rollup": "^1.1.1",
-    "rollup": "^0.41.6",
-    "rollup-plugin-babel": "^2.4.0",
-    "rollup-watch": "~3.2.2",
-    "prettier":"~1"
-  }
+    "name": "interactive-sankey",
+    "version": "0.2.0",
+    "description": "Sankey-diagram style bar chart visualizing change in state",
+    "module": "./src/index.js",
+    "main": "./index.js",
+    "author": "Rho, Inc.",
+    "license": "MIT",
+    "dependencies": {
+        "d3": "~3",
+        "webcharts": "~1.7"
+    },
+    "scripts": {
+        "build": "npm audit fix && npm run bundle && npm run format && npm run minify",
+        "bundle": "rollup -c",
+        "format": "npm run format-src && npm run format-bundle",
+        "format-bundle": "prettier --print-width=100 --tab-width=4 --end-of-line=auto --single-quote --write ./index.js",
+        "format-src": "prettier --print-width=100 --tab-width=4 --end-of-line=auto --single-quote --write \"./src/**/*.js\"",
+        "minify": "npm run minify-bundle && npm run minify-css",
+        "minify-bundle": "minify ./index.js > ./index.min.js",
+        "minify-css": "minify ./index.css > ./index.min.css",
+        "local": "http-server .",
+        "test-page": "start chrome ./test-page/index.html && start firefox ./test-page/index.html && start iexplore file://%CD%/test-page/index.html",
+        "watch": "rollup -c -w"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.17.5",
+        "@babel/preset-env": "^7.16.11",
+        "http-server": "^14.1.0",
+        "minify": "^8.0.4",
+        "prettier": "^2.5.1",
+        "rollup": "^2.67.3",
+        "rollup-plugin-babel": "^4.4.0"
+    }
 }
