@@ -25,6 +25,7 @@ export default function onResize() {
     /**-------------------------------------------------------------------------------------------\
       Default links
     \-------------------------------------------------------------------------------------------**/
+
     const makeSelector = value => value.replace(/[^0-9_a-z]/gi, '-');
     const getNodeId = (x, stratum) => `#node-${makeSelector(x)}-${makeSelector(stratum)}`;
 
@@ -32,11 +33,11 @@ export default function onResize() {
     this.svg
         .selectAll('.bar')
         .on('mouseover', function (d) {
-            const id = getNodeId(d.avlues.x, d.key);
+            const id = getNodeId(d.values.x, d.key);
             chart.svg.select(id).classed('hidden', false);
         })
         .on('mouseout', function (d) {
-            const id = getNodeId(d.avlues.x, d.key);
+            const id = getNodeId(d.values.x, d.key);
             chart.svg.select(id).classed('hidden', true);
         });
 

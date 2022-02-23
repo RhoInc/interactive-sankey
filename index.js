@@ -142,10 +142,16 @@
     }
 
     function onInit() {
+      var _this = this;
+      this.raw_data.sort(function (a, b) {
+        return a[_this.config.node_col] < b[_this.config.node_col] ? -1 : b[_this.config.node_col] < a[_this.config.node_col] ? 1 : 0;
+      });
       this.config.x.order = getXAxisOrder.call(this);
       this.config.x.domain = getXAxisOrder.call(this);
+      console.log(getXAxisOrder.call(this));
       this.config.legend.order = getLegendOrder.call(this);
       this.config.color_dom = getLegendOrder.call(this);
+      console.log(getLegendOrder.call(this));
     }
 
     function onLayout() {
@@ -326,10 +332,10 @@
 
 
       this.svg.selectAll('.bar').on('mouseover', function (d) {
-        var id = getNodeId(d.avlues.x, d.key);
+        var id = getNodeId(d.values.x, d.key);
         chart.svg.select(id).classed('hidden', false);
       }).on('mouseout', function (d) {
-        var id = getNodeId(d.avlues.x, d.key);
+        var id = getNodeId(d.values.x, d.key);
         chart.svg.select(id).classed('hidden', true);
       }); //Capture stacked bar groups.
 
